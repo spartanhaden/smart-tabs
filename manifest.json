@@ -1,0 +1,13 @@
+{
+    "name": "Tab Counter",
+    "version": "1.0",
+    "description": "Counts the number of tabs in the current window",
+    "manifest_version": 3,
+    "permissions": [
+        "tabs"
+    ],
+    "action": {
+        "default_popup": "popup.html",
+        "default_title": "Tab Counter"
+    }
+}
