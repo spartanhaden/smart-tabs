@@ -3,18 +3,19 @@
 
 <head>
     <title>Tab Counter</title>
-    <style>
-        body {
-            width: 200px;
-        }
-    </style>
+    <link rel="stylesheet" href="popup.css">
     <script src="popup.js"></script>
 </head>
 
 <body>
-    <p>Number of tabs in current window: <span id="current-tab-count"></span></p>
-    <p>Number of tabs in all windows: <span id="total-tab-count"></span></p>
-    <!-- make a button to open a page with more info -->
+    <div>
+        <p>Tabs in window</p>
+        <p id="current-tab-count"></p>
+    </div>
+    <div>
+        <p>Tabs total</p>
+        <p id="total-tab-count"></p>
+    </div>
     <button id="more-info">More Info</button>
 </body>
 
