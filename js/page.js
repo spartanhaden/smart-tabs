@@ -68,14 +68,14 @@ function makeTabListItem(tab) {
 
     circle.classList.add(tab.status);
 
-    // add the circle to the li
-    li.appendChild(circle);
-
     // Add the favicon to the li
     li.appendChild(favicon);
 
     // add the link to the list item
     li.appendChild(tabTitle);
+
+    // add the circle to the li
+    li.appendChild(circle);
 
     return li;
 };

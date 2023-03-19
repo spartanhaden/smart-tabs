@@ -33,7 +33,6 @@
 .tab-list {
     padding: 0;
     margin: 0;
-    /* max-width: fit-content; */
 }
 
 .tab-list-item {
@@ -45,7 +44,6 @@
     background-color: #f2f2f2;
     border-radius: 10px;
     cursor: pointer;
-    max-width: 600px;
     margin: 8px;
 }
 
@@ -57,7 +55,8 @@
     justify-content: center;
     align-items: center;
     margin-top: -5px;
-    padding-right: 10px;
+    padding-left: 10px;
+    margin-left: auto;
 }
 
 .circle.unloaded {
