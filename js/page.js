@@ -77,10 +77,39 @@ function makeTabListItem(tab) {
     return li;
 };
 
+function handleSearchBar() {
+    const searchBox = document.getElementById('search-box');
+    const searchResultStatus = document.getElementById('search-result-status');
+    const searchResults = document.getElementById('search-results');
 
+    searchBox.addEventListener('input', function () {
+        const query = searchBox.value.toLowerCase();
+        chrome.tabs.query({}, function (tabs) {
+            const matchingTabs = tabs.filter(function (tab) {
+                return tab.title.toLowerCase().includes(query) || tab.url.toLowerCase().includes(query);
+            });
+            displayResults(matchingTabs);
+        });
+    });
 
-window.onload = function () {
+    function displayResults(tabs) {
+        searchResultStatus.textContent = tabs.length;
+        searchResults.innerHTML = '';
+        if (tabs.length === 0) {
+            searchResults.innerHTML = 'No matching tabs found.';
+            return;
+        }
+        const ul = document.createElement('ul');
+        ul.classList.add("tab-list");
+        tabs.forEach(function (tab) {
+            ul.appendChild(makeTabListItem(tab));
+        });
+        searchResults.appendChild(ul);
+    }
+};
+
     // handle send-data button
+function handleSendDataButton() {
     const sendButton = document.getElementById('send-data');
     sendButton.addEventListener('click', async function () {
         console.log('hello')
@@ -108,51 +137,28 @@ window.onload = function () {
         // };
 
     });
+};
 
-    chrome.tabs.query({ currentWindow: true }, function (currentTabs) {
-        chrome.tabs.query({}, function (allTabs) {
-            let currentCount = currentTabs.length;
-            let totalCount = currentCount;
-            allTabs.forEach(function (tab) {
-                if (tab.windowId != currentTabs[0].windowId) {
-                    totalCount++;
-                }
+window.onload = function () {
+    const windowTabCount = document.getElementById("window-tab-count");
+    const totalTabCount = document.getElementById("total-tab-count");
+    const totalWindowCount = document.getElementById("total-window-count");
+
+    chrome.tabs.query({ currentWindow: true }, function (tabs) {
+        windowTabCount.textContent = tabs.length;
             });
-            document.getElementById("current-tab-count").textContent = currentCount;
-            document.getElementById("total-tab-count").textContent = totalCount;
 
-            const searchBox = document.getElementById('search-box');
-            const searchResultStatus = document.getElementById('search-result-status');
-            const searchResults = document.getElementById('search-results');
-
-            searchBox.addEventListener('input', function () {
-                const query = searchBox.value.toLowerCase();
                 chrome.tabs.query({}, function (tabs) {
-                    const matchingTabs = tabs.filter(function (tab) {
-                        return tab.title.toLowerCase().includes(query) || tab.url.toLowerCase().includes(query);
-                    });
-                    displayResults(matchingTabs);
-                });
+        totalTabCount.textContent = tabs.length;
             });
 
-            function displayResults(tabs) {
-                searchResultStatus.textContent = tabs.length;
-                searchResults.innerHTML = '';
-                if (tabs.length === 0) {
-                    searchResults.innerHTML = 'No matching tabs found.';
-                    return;
-                }
-                const ul = document.createElement('ul');
-                ul.classList.add("tab-list");
-                tabs.forEach(function (tab) {
-                    ul.appendChild(makeTabListItem(tab));
-                });
-                searchResults.appendChild(ul);
-            }
-        });
+    chrome.windows.getAll(function (windows) {
+        totalWindowCount.textContent = windows.length;
     });
 
+    handleSendDataButton();
 
+    handleSearchBar();
 
     // for each window get the title of the current tab and add a new h2 element to the page with that and the number of tabs in the window
     chrome.windows.getAll({ populate: true }, function (windows) {
@@ -166,7 +172,7 @@ window.onload = function () {
         });
 
         // update window-count
-        document.getElementById("window-count").textContent = windows_list.length;
+        document.getElementById("total-window-count").textContent = windows_list.length;
 
         // check for duplicate tab
         let duplicate_tabs = {};

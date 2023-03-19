@@ -1,3 +1,19 @@
+div.info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 200px;
+}
+
+div.info p {
+    margin: 5px;
+    font-size: 16px;
+}
+
+#search {
+    margin-top: 10px;
+}
+
 #search-bar {
     display: flex;
     justify-content: center;
