@@ -17,6 +17,63 @@
 //     }
 // });
 
+// make a new function that returns a list item with the title and url of the tab and favicon and listener to focus the tab and window when clicked
+function makeTabListItem(tab) {
+    let li = document.createElement("li");
+    let a = document.createElement("a");
+
+    // truncate the title if it is too long
+    const maxTabTitleLength = 80;
+    let tabTruncatedTitle = tab.title;
+
+    if (tabTruncatedTitle.length > maxTabTitleLength) { tabTruncatedTitle = tabTruncatedTitle.substring(0, maxTabTitleLength) + "..."; }
+
+    // add a link to the tab
+    a.textContent = tabTruncatedTitle;
+
+    // log active with description
+    // console.log("active: " + tab.active) // true, false
+    // console.log("autoDiscardable: " + tab.autoDiscardable) // true, false
+    // console.log("discarded: " + tab.discarded) // true, false
+    // console.log("highlighted: " + tab.highlighted) // true, false
+    // console.log("selected: " + tab.selected) // true, false
+    // console.log("status: " + tab.status) // unloaded, loading, complete
+
+    // make it focus on the tab and make it the active tab
+    a.addEventListener("click", function () {
+        chrome.tabs.update(tab.id, { active: true });
+        chrome.windows.update(tab.windowId, { focused: true });
+    });
+
+    // Create an img element for the favicon
+    let favicon = document.createElement("img");
+
+    // Set the src attribute of the img element to the tab's favIconUrl
+    favicon.src = tab.favIconUrl;
+
+    // Set the width and height of the favicon
+    favicon.width = 16;
+    favicon.height = 16;
+
+    // Set some style for the favicon to add some spacing between it and the link text
+    favicon.style.marginRight = "8px";
+
+    // Add the favicon to the li
+    li.appendChild(favicon);
+
+    // add the link to the list item
+    li.appendChild(a);
+
+    // hide the bullet points
+    li.style.listStyleType = "none";
+
+    li.style.marginBottom = "10px";
+
+    return li;
+};
+
+
+
 window.onload = function () {
     // handle send-data button
     const sendButton = document.getElementById('send-data');
@@ -82,41 +139,9 @@ window.onload = function () {
                 }
                 const ul = document.createElement('ul');
                 tabs.forEach(function (tab) {
-                    const li = document.createElement('li');
-                    const a = document.createElement('a');
-                    // make it show the title and focus the tab and window when clicked
-                    a.addEventListener('click', function () {
-                        chrome.tabs.update(tab.id, { active: true });
-                        chrome.windows.update(tab.windowId, { focused: true });
-                    });
-                    a.textContent = tab.title;
-                    li.appendChild(a);
-                    li.style.marginBottom = "10px";
-
-                    // if the tab has any previous history available to go back to prepend a green box with a checkmark
-                    if (tab.canGoBack) {
-                        console.log("can go back")
-                        let back = document.createElement("div");
-                        back.style.display = "inline-block";
-                        back.style.backgroundColor = "green";
-                        back.style.width = "20px";
-                        back.style.height = "20px";
-                        back.style.marginRight = "10px";
-                        back.style.marginBottom = "10px";
-                        back.style.borderRadius = "5px";
-                        back.style.textAlign = "center";
-                        back.style.verticalAlign = "middle";
-                        back.style.lineHeight = "20px";
-                        back.style.color = "white";
-                        back.textContent = "✓";
-                        li.prepend(back);
-                    }
-
-
-                    ul.appendChild(li);
+                    ul.appendChild(makeTabListItem(tab));
                 });
                 searchResults.appendChild(ul);
-                // make the objects in searchResults have some more space between them
             }
         });
     });
@@ -219,56 +244,8 @@ window.onload = function () {
 
             // add a list item for each tab in the window
             window.window.tabs.forEach(function (tab) {
-                let li = document.createElement("li");
-                let a = document.createElement("a");
-
-                // truncate the title if it is too long
-                let maxTabTitleLength = 80;
-                let tabTruncatedTitle = tab.title;
-
-                if (tabTruncatedTitle.length > maxTabTitleLength) { tabTruncatedTitle = tabTruncatedTitle.substring(0, maxTabTitleLength) + "..."; }
-
-                // add a link to the tab
-                a.textContent = tabTruncatedTitle;
-
-                // log active with description
-                // console.log("active: " + tab.active) // true, false
-                // console.log("autoDiscardable: " + tab.autoDiscardable) // true, false
-                // console.log("discarded: " + tab.discarded) // true, false
-                // console.log("highlighted: " + tab.highlighted) // true, false
-                // console.log("selected: " + tab.selected) // true, false
-                // console.log("status: " + tab.status) // unloaded, loading, complete
-
-                // make the link focus on the tab and make it the active tab
-                a.addEventListener("click", function () {
-                    chrome.tabs.update(tab.id, { active: true });
-                    chrome.windows.update(tab.windowId, { focused: true });
-                });
-
-                // Create an img element for the favicon
-                let favicon = document.createElement("img");
-
-                // Set the src attribute of the img element to the tab's favIconUrl
-                favicon.src = tab.favIconUrl;
-
-                // Set the width and height of the favicon
-                favicon.width = 16;
-                favicon.height = 16;
-
-                // Set some style for the favicon to add some spacing between it and the link text
-                favicon.style.marginRight = "8px";
-
-                // Add the favicon to the li
-                li.appendChild(favicon);
-
-                // add the link to the list item
-                li.appendChild(a);
-
-                // hide the bullet points
-                li.style.listStyleType = "none";
-
                 // add the list item to the list
-                ul.appendChild(li);
+                ul.appendChild(makeTabListItem(tab));
             });
 
             // add the list to the detail tag
