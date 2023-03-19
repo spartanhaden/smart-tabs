@@ -77,6 +77,24 @@ function makeTabListItem(tab) {
     return li;
 };
 
+function updateInfo() {
+    const windowTabCount = document.getElementById("window-tab-count");
+    const totalTabCount = document.getElementById("total-tab-count");
+    const totalWindowCount = document.getElementById("total-window-count");
+
+    chrome.tabs.query({ currentWindow: true }, function (tabs) {
+        windowTabCount.textContent = tabs.length;
+    });
+
+    chrome.tabs.query({}, function (tabs) {
+        totalTabCount.textContent = tabs.length;
+    });
+
+    chrome.windows.getAll(function (windows) {
+        totalWindowCount.textContent = windows.length;
+    });
+}
+
 function handleSearchBar() {
     const searchBox = document.getElementById('search-box');
     const searchResultStatus = document.getElementById('search-result-status');
@@ -108,7 +126,7 @@ function handleSearchBar() {
     }
 };
 
-    // handle send-data button
+// handle send-data button
 function handleSendDataButton() {
     const sendButton = document.getElementById('send-data');
     sendButton.addEventListener('click', async function () {
@@ -139,135 +157,117 @@ function handleSendDataButton() {
     });
 };
 
-window.onload = function () {
-    const windowTabCount = document.getElementById("window-tab-count");
-    const totalTabCount = document.getElementById("total-tab-count");
-    const totalWindowCount = document.getElementById("total-window-count");
+function handleDuplicateTabs(tabList) {
+    // check for duplicate tab
+    let duplicateTabsDict = {};
 
-    chrome.tabs.query({ currentWindow: true }, function (tabs) {
-        windowTabCount.textContent = tabs.length;
-            });
+    // go through each tab and add it to the duplicate_tabs dict
+    tabList.forEach(function (tab) {
+        // make a new set for each url if it doesn't exist
+        if (!(tab.url in duplicateTabsDict)) { duplicateTabsDict[tab.url] = new Set(); }
 
-                chrome.tabs.query({}, function (tabs) {
-        totalTabCount.textContent = tabs.length;
-            });
-
-    chrome.windows.getAll(function (windows) {
-        totalWindowCount.textContent = windows.length;
+        // add the tab id to the set
+        duplicateTabsDict[tab.url].add(tab.id);
     });
 
-    handleSendDataButton();
+    // make an if statement that checks if there's any duplicates and if so adds a header saying so
+    if (Object.keys(duplicateTabsDict).some(function (url) { return duplicateTabsDict[url].size > 1; })) {
+        // make a detail tag that will show the duplicate tabs
+        const detail = document.createElement("details");
+        const duplicateTabs = document.getElementById("duplicate-tabs");
+        duplicateTabs.appendChild(detail);
 
+        // make a summary tag that will show the duplicate tabs
+        const summary = document.createElement("summary");
+        const h2 = document.createElement("h2");
+        h2.textContent = "Duplicate Tabs found:";
+        h2.style.color = "orange";
+        h2.style.display = "inline-block";
+        // append as a summary to the details tag
+        summary.appendChild(h2);
+        detail.appendChild(summary);
+
+        // go through the duplicate_tabs dict and print any sets with more than one element
+        for (let url in duplicateTabsDict) {
+            if (duplicateTabsDict[url].size > 1) {
+                // make a h3 that says the count and the url
+                const duplicateSet = document.createElement("div");
+                duplicateSet.textContent = "(" + duplicateTabsDict[url].size + ") - " + url;
+
+                detail.appendChild(duplicateSet);
+
+                const ul = document.createElement("ul");
+                ul.classList.add("tab-list");
+
+                // get all the tabs with that url
+                chrome.tabs.query({ url: url }, function (tabs) {
+                    // for each tab
+                    tabs.forEach(function (tab) {
+                        ul.appendChild(makeTabListItem(tab));
+                    });
+                });
+                detail.appendChild(ul);
+            }
+        }
+    }
+}
+
+window.onload = function () {
+    handleSendDataButton();
+    updateInfo();
     handleSearchBar();
 
     // for each window get the title of the current tab and add a new h2 element to the page with that and the number of tabs in the window
     chrome.windows.getAll({ populate: true }, function (windows) {
-        let windows_list = [];
-        let tab_list = [];
+        let windowList = [];
+        let tabList = [];
 
         windows.forEach(function (window) {
-            windows_list.push({ 'window': window, 'title': window.tabs[0].title, 'tab_count': window.tabs.length })
+            windowList.push({ 'window': window, 'title': window.tabs[0].title, 'tab_count': window.tabs.length })
 
-            window.tabs.forEach(function (tab) { tab_list.push(tab); });
+            window.tabs.forEach(function (tab) { tabList.push(tab); });
         });
 
-        // update window-count
-        document.getElementById("total-window-count").textContent = windows_list.length;
+        handleDuplicateTabs(tabList);
 
-        // check for duplicate tab
-        let duplicate_tabs = {};
-
-        // go through each tab and add it to the duplicate_tabs dict
-        tab_list.forEach(function (tab) {
-            // make a new set for each url if it doesn't exist
-            if (!(tab.url in duplicate_tabs)) { duplicate_tabs[tab.url] = new Set(); }
-
-            // add the tab id to the set
-            duplicate_tabs[tab.url].add(tab.id);
-        });
-
-        // make an if statement that checks if there's any duplicates and if so adds a header saying so
-        if (Object.keys(duplicate_tabs).some(function (url) { return duplicate_tabs[url].size > 1; })) {
-            // make a detail tag that will show the duplicate tabs
-            const detail = document.createElement("details");
-            document.body.appendChild(detail);
-
-            // make a summary tag that will show the duplicate tabs
-            const summary = document.createElement("summary");
-            const h2 = document.createElement("h2");
-            h2.textContent = "Duplicate Tabs found:";
-            h2.style.color = "orange";
-            h2.style.display = "inline-block";
-            // append as a summary to the details tag
-            summary.appendChild(h2);
-            detail.appendChild(summary);
-
-            // go through the duplicate_tabs dict and print any sets with more than one element
-            for (let url in duplicate_tabs) {
-                if (duplicate_tabs[url].size > 1) {
-                    // make a h3 that says the count and the url
-                    const duplicateSet = document.createElement("div");
-                    duplicateSet.textContent = "(" + duplicate_tabs[url].size + ") - " + url;
-
-                    detail.appendChild(duplicateSet);
-
-                    const ul = document.createElement("ul");
-                    ul.classList.add("tab-list");
-
-                    // get all the tabs with that url
-                    chrome.tabs.query({ url: url }, function (tabs) {
-                        // for each tab
-                        tabs.forEach(function (tab) {
-                            ul.appendChild(makeTabListItem(tab));
-                        });
-                    });
-                    detail.appendChild(ul);
-                }
-            }
-        }
-
-        // make a h2 that says tabs
-        const h2 = document.createElement("h2");
-        h2.textContent = "Windows:";
-        document.body.appendChild(h2);
+        // get by id windows
+        const windowsSection = document.getElementById("windows");
 
         // sort the windows array by the reverse number of tabs in each window
-        windows_list.sort(function (a, b) {
+        windowList.sort(function (a, b) {
             return a.tab_count - b.tab_count;
         });
 
         // for each dict in the windows array
-        windows_list.forEach(function (window) {
-            // truncate the title if it is too long
-            const maxTitleLength = 80;
-            let truncatedTitle = window.title;
-            if (truncatedTitle.length > maxTitleLength) { truncatedTitle = truncatedTitle.substring(0, maxTitleLength) + "..."; }
-
+        windowList.forEach(function (window) {
             // add a button called focus that will focus on that window
             const focusBtn = document.createElement("button");
+            focusBtn.classList.add("focus-btn");
             focusBtn.textContent = "focus";
             focusBtn.addEventListener("click", function () { chrome.windows.update(window.window.id, { focused: true }); });
 
-            // add an h3 with the number of tabs in the window and the title of the current tab on the same line
+            // add an div with the number of tabs in the window and the title window on the same line
             // (tab_count) - title
-            const h3 = document.createElement("h3");
-            h3.textContent = "(" + window.tab_count + ") - " + truncatedTitle;
+            const windowTitle = document.createElement("div");
+            windowTitle.classList.add("window-title");
+            windowTitle.textContent = "(" + window.tab_count + ") - " + window.title;
 
             const container = document.createElement("div");
 
-            // Set the display property of both elements to inline-block
-            focusBtn.style.display = "inline-block";
-            h3.style.display = "inline-block";
-
-            // make the button and the h3 have a little space between them
-            focusBtn.style.marginRight = "10px";
-
             // add a list of all the tabs in the window in a ul detail tag
-            const detail = document.createElement("details");
-            const summary = document.createElement("summary");
+            const windowDetail = document.createElement("details");
+            const windowSummary = document.createElement("summary");
+
+            windowSummary.style.display = "flex";
 
             const ul = document.createElement("ul");
             ul.classList.add("tab-list");
+
+            windowSummary.appendChild(focusBtn);
+            windowSummary.appendChild(windowTitle);
+
+            // add the summary to the detail
+            windowDetail.appendChild(windowSummary);
 
             // add a list item for each tab in the window
             window.window.tabs.forEach(function (tab) {
@@ -276,22 +276,15 @@ window.onload = function () {
             });
 
             // add the list to the detail tag
-            detail.appendChild(ul);
+            windowDetail.appendChild(ul);
 
             // expand if there are less than 50 tabs in the window
-            if (window.tab_count < 50) { detail.setAttribute("open", ""); }
-
-            summary.appendChild(focusBtn);
-            summary.appendChild(h3);
-
-            // add the summary to the detail
-            detail.appendChild(summary);
+            if (window.tab_count < 50) { windowDetail.setAttribute("open", ""); }
 
             // add the detail tag to the container
-            container.appendChild(detail);
+            container.appendChild(windowDetail);
 
-            document.body.appendChild(container);
-
+            windowsSection.appendChild(container);
         });
     });
 };

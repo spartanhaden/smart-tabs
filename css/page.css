@@ -1,11 +1,11 @@
-div.info {
+#stats div {
     display: flex;
     justify-content: space-between;
     align-items: center;
     max-width: 200px;
 }
 
-div.info p {
+#stats p {
     margin: 5px;
     font-size: 16px;
 }
@@ -91,4 +91,24 @@ div.info p {
 
 .circle.complete {
     color: #00FF00;
+}
+
+.window-title {
+    font-size: 16px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.focus-btn {
+    margin-left: 10px;
+    margin-right: 10px;
+    cursor: pointer;
+    /* make the button look nice */
+    border: none;
+    border-radius: 5px;
+    padding: 5px;
+    background-color: #f2f2f2;
+    /* align vertically */
+    /* align-items: center; */
 }

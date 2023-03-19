@@ -14,22 +14,22 @@
     <!-- send status -->
     <div id="status"></div>
 
-    <div class="info">
-        <p>Tabs in window</p>
-        <p id="window-tab-count"></p>
-    </div>
-    <div class="info">
-        <p>Windows</p>
-        <p id="total-window-count"></p>
-    </div>
-    <div class="info">
-        <p>Tabs</p>
-        <p id="total-tab-count"></p>
+    <div id="stats">
+        <div>
+            <p>Tabs in window</p>
+            <p id="window-tab-count"></p>
+        </div>
+        <div>
+            <p>Windows</p>
+            <p id="total-window-count"></p>
+        </div>
+        <div>
+            <p>Tabs</p>
+            <p id="total-tab-count"></p>
+        </div>
     </div>
 
-    <!-- search box -->
     <div id="search">
-        <!-- style all the things in the bar on one line -->
         <div id="search-bar">
             <input type="text" id="search-box" placeholder="Search for a tab" />
             <div id="search-result-status"></div>
@@ -37,6 +37,13 @@
         <div id="search-results"></div>
     </div>
 
+    <div id=duplicate-tabs></div>
+
+    <div id="windows">
+        <div class="section-header">
+            <h1>Windows</h1>
+        </div>
+    </div>
 </body>
 
 </html>
