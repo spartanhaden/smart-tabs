@@ -4,6 +4,7 @@
 <head>
     <title>Tab Info</title>
     <script src="page.js"></script>
+    <link rel="stylesheet" href="page.css">
 </head>
 
 <body>
@@ -18,9 +19,15 @@
     <p>Number of tabs in all windows: <span id="total-tab-count"></span></p>
 
     <!-- search box -->
-    <input type="text" id="search-box" placeholder="Search for a tab" />
-    <div id="search-result-count"></div>
-    <div id="search-results"></div>
+    <div id="search">
+        <!-- style all the things in the bar on one line -->
+        <div id="search-bar" style="">
+            <input type="text" id="search-box" placeholder="Search for a tab" />
+            <div id="search-result-status"></div>
+        </div>
+        <div id="search-results"></div>
+    </div>
+
 </body>
 
 </html>

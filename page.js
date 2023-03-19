@@ -60,8 +60,8 @@ window.onload = function () {
             document.getElementById("total-tab-count").textContent = totalCount;
 
             const searchBox = document.getElementById('search-box');
+            const searchResultStatus = document.getElementById('search-result-status');
             const searchResults = document.getElementById('search-results');
-            const searchResultCount = document.getElementById('search-result-count');
 
             searchBox.addEventListener('input', function () {
                 const query = searchBox.value.toLowerCase();
@@ -74,7 +74,7 @@ window.onload = function () {
             });
 
             function displayResults(tabs) {
-                searchResultCount.textContent = tabs.length;
+                searchResultStatus.textContent = tabs.length;
                 searchResults.innerHTML = '';
                 if (tabs.length === 0) {
                     searchResults.innerHTML = 'No matching tabs found.';
