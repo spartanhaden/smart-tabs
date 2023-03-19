@@ -1,0 +1,293 @@
+// chrome.tabs.onUpdated.addListener(async function (tabId, changeInfo, tab) {
+//     if (changeInfo.status === 'complete') {
+//         const title = tab.title;
+//         const url = 'http://localhost:8000/title';
+//         const options = {
+//             method: 'POST',
+//             headers: {
+//                 'Content-Type': 'application/json'
+//             },
+//             body: JSON.stringify({ title })
+//         };
+
+//         // send and don't wait for response
+//         fetch(url, options);
+//         // const response = await fetch(url, options);
+//         // console.log(await response.text());
+//     }
+// });
+
+window.onload = function () {
+    // handle send-data button
+    const sendButton = document.getElementById('send-data');
+    sendButton.addEventListener('click', async function () {
+        console.log('hello')
+        const title = 'hello';
+        // Send the title to the local server
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', 'http://localhost:8000/title');
+        xhr.setRequestHeader('Content-Type', 'application/json');
+
+        // try to send and if there is no response change the button text to failed also catch Failed to load resource: net::ERR_CONNECTION_REFUSED
+
+        // status div
+        const status = document.getElementById('status');
+
+        response = xhr.send(JSON.stringify({ title }));
+
+        // xhr.onload = function () {
+        //     if (xhr.status != 200) { // analyze HTTP status of the response
+        //         console.log(`Error ${xhr.status}: ${xhr.statusText}`); // e.g. 404: Not Found
+        //         status.textContent = `Error ${xhr.status}: ${xhr.statusText}`;
+        //     } else { // show the result
+        //         console.log(`Done, got ${xhr.response.length} bytes`); // response is the server
+        //         status.textContent = `Done, got ${xhr.response.length} bytes`;
+        //     }
+        // };
+
+    });
+
+    chrome.tabs.query({ currentWindow: true }, function (currentTabs) {
+        chrome.tabs.query({}, function (allTabs) {
+            let currentCount = currentTabs.length;
+            let totalCount = currentCount;
+            allTabs.forEach(function (tab) {
+                if (tab.windowId != currentTabs[0].windowId) {
+                    totalCount++;
+                }
+            });
+            document.getElementById("current-tab-count").textContent = currentCount;
+            document.getElementById("total-tab-count").textContent = totalCount;
+
+            const searchBox = document.getElementById('search-box');
+            const searchResults = document.getElementById('search-results');
+            const searchResultCount = document.getElementById('search-result-count');
+
+            searchBox.addEventListener('input', function () {
+                const query = searchBox.value.toLowerCase();
+                chrome.tabs.query({}, function (tabs) {
+                    const matchingTabs = tabs.filter(function (tab) {
+                        return tab.title.toLowerCase().includes(query) || tab.url.toLowerCase().includes(query);
+                    });
+                    displayResults(matchingTabs);
+                });
+            });
+
+            function displayResults(tabs) {
+                searchResultCount.textContent = tabs.length;
+                searchResults.innerHTML = '';
+                if (tabs.length === 0) {
+                    searchResults.innerHTML = 'No matching tabs found.';
+                    return;
+                }
+                const ul = document.createElement('ul');
+                tabs.forEach(function (tab) {
+                    const li = document.createElement('li');
+                    const a = document.createElement('a');
+                    // make it show the title and focus the tab and window when clicked
+                    a.addEventListener('click', function () {
+                        chrome.tabs.update(tab.id, { active: true });
+                        chrome.windows.update(tab.windowId, { focused: true });
+                    });
+                    a.textContent = tab.title;
+                    li.appendChild(a);
+                    li.style.marginBottom = "10px";
+
+                    // if the tab has any previous history available to go back to prepend a green box with a checkmark
+                    if (tab.canGoBack) {
+                        console.log("can go back")
+                        let back = document.createElement("div");
+                        back.style.display = "inline-block";
+                        back.style.backgroundColor = "green";
+                        back.style.width = "20px";
+                        back.style.height = "20px";
+                        back.style.marginRight = "10px";
+                        back.style.marginBottom = "10px";
+                        back.style.borderRadius = "5px";
+                        back.style.textAlign = "center";
+                        back.style.verticalAlign = "middle";
+                        back.style.lineHeight = "20px";
+                        back.style.color = "white";
+                        back.textContent = "✓";
+                        li.prepend(back);
+                    }
+
+
+                    ul.appendChild(li);
+                });
+                searchResults.appendChild(ul);
+                // make the objects in searchResults have some more space between them
+            }
+        });
+    });
+
+
+
+    // for each window get the title of the current tab and add a new h2 element to the page with that and the number of tabs in the window
+    chrome.windows.getAll({ populate: true }, function (windows) {
+        let windows_list = [];
+        let tab_list = [];
+
+        windows.forEach(function (window) {
+            windows_list.push({ 'window': window, 'title': window.tabs[0].title, 'tab_count': window.tabs.length })
+
+            window.tabs.forEach(function (tab) { tab_list.push(tab); });
+        });
+
+        // update window-count
+        document.getElementById("window-count").textContent = windows_list.length;
+
+        // check for duplicate tab
+        let duplicate_tabs = {};
+
+        // go through each tab and add it to the duplicate_tabs dict
+        tab_list.forEach(function (tab) {
+            // make a new set for each url if it doesn't exist
+            if (!(tab.url in duplicate_tabs)) { duplicate_tabs[tab.url] = new Set(); }
+
+            // add the tab id to the set
+            duplicate_tabs[tab.url].add(tab.id);
+        });
+
+        // make an if statement that checks if there's any duplicates and if so adds a header saying so
+        if (Object.keys(duplicate_tabs).some(function (url) { return duplicate_tabs[url].size > 1; })) {
+            // make a detail tag that will show the duplicate tabs
+            let detail = document.createElement("details");
+            document.body.appendChild(detail);
+
+            // make a summary tag that will show the duplicate tabs
+            let summary = document.createElement("summary");
+            let h2 = document.createElement("h2");
+            h2.textContent = "Duplicate Tabs found:";
+            h2.style.color = "orange";
+            h2.style.display = "inline-block";
+            // append as a summary to the details tag
+            summary.appendChild(h2);
+            detail.appendChild(summary);
+
+            // go through the duplicate_tabs dict and print any sets with more than one element
+            for (let url in duplicate_tabs) {
+                if (duplicate_tabs[url].size > 1) {
+                    // make a h3 that says the count and the url
+                    let h3 = document.createElement("h3");
+                    h3.textContent = "(" + duplicate_tabs[url].size + ") - " + url;
+                    detail.appendChild(h3);
+                }
+            }
+        }
+
+        // make a h2 that says tabs
+        let h2 = document.createElement("h2");
+        h2.textContent = "Windows:";
+        document.body.appendChild(h2);
+
+        // sort the windows array by the reverse number of tabs in each window
+        windows_list.sort(function (a, b) {
+            return a.tab_count - b.tab_count;
+        });
+
+        // for each dict in the windows array
+        windows_list.forEach(function (window) {
+            // truncate the title if it is too long
+            let maxTitleLength = 80;
+            let truncatedTitle = window.title;
+            if (truncatedTitle.length > maxTitleLength) { truncatedTitle = truncatedTitle.substring(0, maxTitleLength) + "..."; }
+
+            // add a button called focus that will focus on that window
+            let focusBtn = document.createElement("button");
+            focusBtn.textContent = "focus";
+            focusBtn.addEventListener("click", function () { chrome.windows.update(window.window.id, { focused: true }); });
+
+            // add an h3 with the number of tabs in the window and the title of the current tab on the same line
+            // (tab_count) - title
+            let h3 = document.createElement("h3");
+            h3.textContent = "(" + window.tab_count + ") - " + truncatedTitle;
+
+            let container = document.createElement("div");
+
+            // Set the display property of both elements to inline-block
+            focusBtn.style.display = "inline-block";
+            h3.style.display = "inline-block";
+
+            // make the button and the h3 have a little space between them
+            focusBtn.style.marginRight = "10px";
+
+            // add a list of all the tabs in the window in a ul detail tag
+            let detail = document.createElement("details");
+            let summary = document.createElement("summary");
+            let ul = document.createElement("ul");
+
+            // add a list item for each tab in the window
+            window.window.tabs.forEach(function (tab) {
+                let li = document.createElement("li");
+                let a = document.createElement("a");
+
+                // truncate the title if it is too long
+                let maxTabTitleLength = 80;
+                let tabTruncatedTitle = tab.title;
+
+                if (tabTruncatedTitle.length > maxTabTitleLength) { tabTruncatedTitle = tabTruncatedTitle.substring(0, maxTabTitleLength) + "..."; }
+
+                // add a link to the tab
+                a.textContent = tabTruncatedTitle;
+
+                // log active with description
+                // console.log("active: " + tab.active) // true, false
+                // console.log("autoDiscardable: " + tab.autoDiscardable) // true, false
+                // console.log("discarded: " + tab.discarded) // true, false
+                // console.log("highlighted: " + tab.highlighted) // true, false
+                // console.log("selected: " + tab.selected) // true, false
+                // console.log("status: " + tab.status) // unloaded, loading, complete
+
+                // make the link focus on the tab and make it the active tab
+                a.addEventListener("click", function () {
+                    chrome.tabs.update(tab.id, { active: true });
+                    chrome.windows.update(tab.windowId, { focused: true });
+                });
+
+                // Create an img element for the favicon
+                let favicon = document.createElement("img");
+
+                // Set the src attribute of the img element to the tab's favIconUrl
+                favicon.src = tab.favIconUrl;
+
+                // Set the width and height of the favicon
+                favicon.width = 16;
+                favicon.height = 16;
+
+                // Set some style for the favicon to add some spacing between it and the link text
+                favicon.style.marginRight = "8px";
+
+                // Add the favicon to the li
+                li.appendChild(favicon);
+
+                // add the link to the list item
+                li.appendChild(a);
+
+                // hide the bullet points
+                li.style.listStyleType = "none";
+
+                // add the list item to the list
+                ul.appendChild(li);
+            });
+
+            // add the list to the detail tag
+            detail.appendChild(ul);
+
+            // expand
+            detail.setAttribute("open", "");
+
+            summary.appendChild(focusBtn);
+            summary.appendChild(h3);
+
+            // add the summary to the detail
+            detail.appendChild(summary);
+
+            // add the detail tag to the container
+            container.appendChild(detail);
+
+            document.body.appendChild(container);
+
+        });
+    });
+};
