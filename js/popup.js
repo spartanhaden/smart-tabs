@@ -1,8 +1,8 @@
 window.onload = function () {
-    let windowTabCount = document.getElementById("window-tab-count");
-    let totalTabCount = document.getElementById("total-tab-count");
-    let totalWindowCount = document.getElementById("total-window-count");
-    let moreInfoBtn = document.getElementById("more-info");
+    const windowTabCount = document.getElementById("window-tab-count");
+    const totalTabCount = document.getElementById("total-tab-count");
+    const totalWindowCount = document.getElementById("total-window-count");
+    const moreInfoBtn = document.getElementById("more-info");
 
     chrome.tabs.query({ currentWindow: true }, function (tabs) {
         windowTabCount.textContent = tabs.length;

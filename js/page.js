@@ -19,8 +19,8 @@
 
 // make a new function that returns a list item with the title and url of the tab and favicon and listener to focus the tab and window when clicked
 function makeTabListItem(tab) {
-    let li = document.createElement("li");
-    let tabTitle = document.createElement("div");
+    const li = document.createElement("li");
+    const tabTitle = document.createElement("div");
 
     // add the class tab-list-item to the li
     li.classList.add("tab-list-item");
@@ -46,7 +46,7 @@ function makeTabListItem(tab) {
     });
 
     // Create an img element for the favicon
-    let favicon = document.createElement("img");
+    const favicon = document.createElement("img");
 
     // Set the src attribute of the img element to the tab's favIconUrl
     favicon.src = tab.favIconUrl;
@@ -59,7 +59,7 @@ function makeTabListItem(tab) {
     favicon.style.marginRight = "8px";
 
     // make a circle element
-    let circle = document.createElement("div");
+    const circle = document.createElement("div");
     circle.classList.add("circle");
     circle.textContent = "\u25CF";
 
@@ -183,12 +183,12 @@ window.onload = function () {
         // make an if statement that checks if there's any duplicates and if so adds a header saying so
         if (Object.keys(duplicate_tabs).some(function (url) { return duplicate_tabs[url].size > 1; })) {
             // make a detail tag that will show the duplicate tabs
-            let detail = document.createElement("details");
+            const detail = document.createElement("details");
             document.body.appendChild(detail);
 
             // make a summary tag that will show the duplicate tabs
-            let summary = document.createElement("summary");
-            let h2 = document.createElement("h2");
+            const summary = document.createElement("summary");
+            const h2 = document.createElement("h2");
             h2.textContent = "Duplicate Tabs found:";
             h2.style.color = "orange";
             h2.style.display = "inline-block";
@@ -200,12 +200,12 @@ window.onload = function () {
             for (let url in duplicate_tabs) {
                 if (duplicate_tabs[url].size > 1) {
                     // make a h3 that says the count and the url
-                    let duplicateSet = document.createElement("div");
+                    const duplicateSet = document.createElement("div");
                     duplicateSet.textContent = "(" + duplicate_tabs[url].size + ") - " + url;
 
                     detail.appendChild(duplicateSet);
 
-                    let ul = document.createElement("ul");
+                    const ul = document.createElement("ul");
                     ul.classList.add("tab-list");
 
                     // get all the tabs with that url
@@ -221,7 +221,7 @@ window.onload = function () {
         }
 
         // make a h2 that says tabs
-        let h2 = document.createElement("h2");
+        const h2 = document.createElement("h2");
         h2.textContent = "Windows:";
         document.body.appendChild(h2);
 
@@ -233,21 +233,21 @@ window.onload = function () {
         // for each dict in the windows array
         windows_list.forEach(function (window) {
             // truncate the title if it is too long
-            let maxTitleLength = 80;
+            const maxTitleLength = 80;
             let truncatedTitle = window.title;
             if (truncatedTitle.length > maxTitleLength) { truncatedTitle = truncatedTitle.substring(0, maxTitleLength) + "..."; }
 
             // add a button called focus that will focus on that window
-            let focusBtn = document.createElement("button");
+            const focusBtn = document.createElement("button");
             focusBtn.textContent = "focus";
             focusBtn.addEventListener("click", function () { chrome.windows.update(window.window.id, { focused: true }); });
 
             // add an h3 with the number of tabs in the window and the title of the current tab on the same line
             // (tab_count) - title
-            let h3 = document.createElement("h3");
+            const h3 = document.createElement("h3");
             h3.textContent = "(" + window.tab_count + ") - " + truncatedTitle;
 
-            let container = document.createElement("div");
+            const container = document.createElement("div");
 
             // Set the display property of both elements to inline-block
             focusBtn.style.display = "inline-block";
@@ -257,10 +257,10 @@ window.onload = function () {
             focusBtn.style.marginRight = "10px";
 
             // add a list of all the tabs in the window in a ul detail tag
-            let detail = document.createElement("details");
-            let summary = document.createElement("summary");
+            const detail = document.createElement("details");
+            const summary = document.createElement("summary");
 
-            let ul = document.createElement("ul");
+            const ul = document.createElement("ul");
             ul.classList.add("tab-list");
 
             // add a list item for each tab in the window
