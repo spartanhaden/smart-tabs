@@ -1,18 +1,22 @@
-chrome.tabs.query({ currentWindow: true }, function (currentTabs) {
-    chrome.tabs.query({}, function (allTabs) {
-        let currentCount = currentTabs.length;
-        let totalCount = currentCount;
-        allTabs.forEach(function (tab) {
-            if (tab.windowId != currentTabs[0].windowId) {
-                totalCount++;
-            }
-        });
-        document.getElementById("current-tab-count").textContent = currentCount;
-        document.getElementById("total-tab-count").textContent = totalCount;
+window.onload = function () {
+    let windowTabCount = document.getElementById("window-tab-count");
+    let totalTabCount = document.getElementById("total-tab-count");
+    let totalWindowCount = document.getElementById("total-window-count");
+    let moreInfoBtn = document.getElementById("more-info");
 
-        let moreInfoBtn = document.getElementById("more-info");
-        moreInfoBtn.addEventListener("click", function() {
-            chrome.tabs.create({ url: "page.html" });
-        });
+    chrome.tabs.query({ currentWindow: true }, function (tabs) {
+        windowTabCount.textContent = tabs.length;
     });
-});
+
+    chrome.tabs.query({}, function (tabs) {
+        totalTabCount.textContent = tabs.length;
+    });
+
+    chrome.windows.getAll(function (windows) {
+        totalWindowCount.textContent = windows.length;
+    });
+
+    moreInfoBtn.addEventListener("click", function () {
+        chrome.tabs.create({ url: "page.html" });
+    });
+}
