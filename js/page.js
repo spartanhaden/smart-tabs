@@ -25,14 +25,11 @@ function makeTabListItem(tab) {
     // add the class tab-list-item to the li
     li.classList.add("tab-list-item");
 
-    // truncate the title if it is too long
-    const maxTabTitleLength = 80;
-    let tabTruncatedTitle = tab.title;
+    // add a tab title
+    tabTitle.textContent = tab.title;
 
-    if (tabTruncatedTitle.length > maxTabTitleLength) { tabTruncatedTitle = tabTruncatedTitle.substring(0, maxTabTitleLength) + "..."; }
-
-    // add a link to the tab
-    tabTitle.textContent = tabTruncatedTitle;
+    // make the tab title auto truncate with fade if it is too long
+    tabTitle.classList.add("tab-title");
 
     // log active with description
     // console.log("active: " + tab.active) // true, false
