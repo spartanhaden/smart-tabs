@@ -8,7 +8,7 @@ window.onload = function () {
         windowTabCount.textContent = tabs.length;
     });
 
-    chrome.tabs.getAll(function (tabs) {
+    chrome.tabs.query({}, function (tabs) {
         totalTabCount.textContent = tabs.length;
     });
 
