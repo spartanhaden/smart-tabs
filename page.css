@@ -28,3 +28,46 @@
     max-height: 400px;
     overflow-y: scroll;
 }
+
+
+.tab-list {
+    padding: 0;
+    margin: 0;
+    /* max-width: fit-content; */
+}
+
+.tab-list-item {
+    list-style-type: none;
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid #f2f2f2;
+    background-color: #f2f2f2;
+    border-radius: 10px;
+    cursor: pointer;
+    max-width: 600px;
+    margin: 8px;
+}
+
+.circle {
+    width: 20px;
+    height: 20px;
+    font-size: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: -5px;
+    padding-right: 10px;
+}
+
+.circle.unloaded {
+    color: #FF0000;
+}
+
+.circle.loading {
+    color: #FFA500;
+}
+
+.circle.complete {
+    color: #00FF00;
+}

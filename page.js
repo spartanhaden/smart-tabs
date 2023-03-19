@@ -20,7 +20,10 @@
 // make a new function that returns a list item with the title and url of the tab and favicon and listener to focus the tab and window when clicked
 function makeTabListItem(tab) {
     let li = document.createElement("li");
-    let a = document.createElement("a");
+    let tabTitle = document.createElement("div");
+
+    // add the class tab-list-item to the li
+    li.classList.add("tab-list-item");
 
     // truncate the title if it is too long
     const maxTabTitleLength = 80;
@@ -29,7 +32,7 @@ function makeTabListItem(tab) {
     if (tabTruncatedTitle.length > maxTabTitleLength) { tabTruncatedTitle = tabTruncatedTitle.substring(0, maxTabTitleLength) + "..."; }
 
     // add a link to the tab
-    a.textContent = tabTruncatedTitle;
+    tabTitle.textContent = tabTruncatedTitle;
 
     // log active with description
     // console.log("active: " + tab.active) // true, false
@@ -40,7 +43,7 @@ function makeTabListItem(tab) {
     // console.log("status: " + tab.status) // unloaded, loading, complete
 
     // make it focus on the tab and make it the active tab
-    a.addEventListener("click", function () {
+    li.addEventListener("click", function () {
         chrome.tabs.update(tab.id, { active: true });
         chrome.windows.update(tab.windowId, { focused: true });
     });
@@ -58,16 +61,21 @@ function makeTabListItem(tab) {
     // Set some style for the favicon to add some spacing between it and the link text
     favicon.style.marginRight = "8px";
 
+    // make a circle element
+    let circle = document.createElement("div");
+    circle.classList.add("circle");
+    circle.textContent = "\u25CF";
+
+    circle.classList.add(tab.status);
+
+    // add the circle to the li
+    li.appendChild(circle);
+
     // Add the favicon to the li
     li.appendChild(favicon);
 
     // add the link to the list item
-    li.appendChild(a);
-
-    // hide the bullet points
-    li.style.listStyleType = "none";
-
-    li.style.marginBottom = "10px";
+    li.appendChild(tabTitle);
 
     return li;
 };
@@ -138,6 +146,7 @@ window.onload = function () {
                     return;
                 }
                 const ul = document.createElement('ul');
+                ul.classList.add("tab-list");
                 tabs.forEach(function (tab) {
                     ul.appendChild(makeTabListItem(tab));
                 });
@@ -194,9 +203,22 @@ window.onload = function () {
             for (let url in duplicate_tabs) {
                 if (duplicate_tabs[url].size > 1) {
                     // make a h3 that says the count and the url
-                    let h3 = document.createElement("h3");
-                    h3.textContent = "(" + duplicate_tabs[url].size + ") - " + url;
-                    detail.appendChild(h3);
+                    let duplicateSet = document.createElement("div");
+                    duplicateSet.textContent = "(" + duplicate_tabs[url].size + ") - " + url;
+
+                    detail.appendChild(duplicateSet);
+
+                    let ul = document.createElement("ul");
+                    ul.classList.add("tab-list");
+
+                    // get all the tabs with that url
+                    chrome.tabs.query({ url: url }, function (tabs) {
+                        // for each tab
+                        tabs.forEach(function (tab) {
+                            ul.appendChild(makeTabListItem(tab));
+                        });
+                    });
+                    detail.appendChild(ul);
                 }
             }
         }
@@ -240,7 +262,9 @@ window.onload = function () {
             // add a list of all the tabs in the window in a ul detail tag
             let detail = document.createElement("details");
             let summary = document.createElement("summary");
+
             let ul = document.createElement("ul");
+            ul.classList.add("tab-list");
 
             // add a list item for each tab in the window
             window.window.tabs.forEach(function (tab) {
@@ -251,8 +275,8 @@ window.onload = function () {
             // add the list to the detail tag
             detail.appendChild(ul);
 
-            // expand
-            detail.setAttribute("open", "");
+            // expand if there are less than 50 tabs in the window
+            if (window.tab_count < 50) { detail.setAttribute("open", ""); }
 
             summary.appendChild(focusBtn);
             summary.appendChild(h3);
