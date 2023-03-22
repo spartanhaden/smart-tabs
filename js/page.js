@@ -259,6 +259,7 @@ window.onload = function () {
             windowTitle.textContent = "(" + window.tab_count + ") - " + window.title;
 
             const container = document.createElement("div");
+            container.classList.add("window");
 
             // add a list of all the tabs in the window in a ul detail tag
             const windowDetail = document.createElement("details");
