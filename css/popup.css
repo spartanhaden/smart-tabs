@@ -2,14 +2,16 @@ body {
     width: 160px;
 }
 
-div {
+#stats div {
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    max-width: 200px;
 }
 
-p {
-    font-size: 16px;
+#stats p {
     margin: 5px;
+    font-size: 16px;
 }
 
 button {
