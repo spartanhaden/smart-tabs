@@ -81,6 +81,7 @@ function updateInfo() {
     const windowTabCount = document.getElementById("window-tab-count");
     const totalTabCount = document.getElementById("total-tab-count");
     const totalWindowCount = document.getElementById("total-window-count");
+    const activeTabCount = document.getElementById("active-tab-count");
 
     chrome.tabs.query({ currentWindow: true }, function (tabs) {
         windowTabCount.textContent = tabs.length;
@@ -88,6 +89,11 @@ function updateInfo() {
 
     chrome.tabs.query({}, function (tabs) {
         totalTabCount.textContent = tabs.length;
+
+        // count how many tabs have tab.status as complete
+        let tabsFinishedLoading = 0;
+        tabs.forEach(tab => (tab.status === "complete" ? tabsFinishedLoading++ : null));
+        activeTabCount.textContent = tabsFinishedLoading;
     });
 
     chrome.windows.getAll(function (windows) {
