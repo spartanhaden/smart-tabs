@@ -115,3 +115,19 @@
     /* align vertically */
     /* align-items: center; */
 }
+
+.close-btn {
+    cursor: pointer;
+    /* make the button look nice */
+    border: none;
+    border-radius: 50px;
+    width: 25px;
+    height: 25px;
+    margin-right: 10px;
+    /* font white */
+    color: #FFFFFF;
+    /* red background */
+    background-color: #FF0000;
+    /* align vertically */
+    align-items: center;
+}

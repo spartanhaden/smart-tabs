@@ -25,6 +25,9 @@ function makeTabListItem(tab) {
     // add the class tab-list-item to the li
     li.classList.add("tab-list-item");
 
+    // add the class tab.id to the li
+    li.classList.add("tabid-" + tab.id);
+
     // add a tab title
     tabTitle.textContent = tab.title;
 
@@ -64,6 +67,20 @@ function makeTabListItem(tab) {
     circle.textContent = "\u25CF";
 
     circle.classList.add(tab.status);
+
+    // Create a close button
+    const closeButton = document.createElement("button");
+    closeButton.textContent = "X";
+    closeButton.classList.add("close-btn");
+
+    // Add a click event listener to close the tab
+    closeButton.addEventListener("click", function (event) {
+        event.stopPropagation(); // Prevent triggering the li click event
+        chrome.tabs.remove(tab.id);
+    });
+
+    // Add the close button to the li
+    li.appendChild(closeButton);
 
     // Add the favicon to the li
     li.appendChild(favicon);
@@ -295,3 +312,40 @@ window.onload = function () {
         });
     });
 };
+
+function updateTabList(tabId, remove) {
+    if (remove) {
+        const listItemClass = `tabid-${tabId}`;
+
+        // get all instances of the tab id
+        const listItems = document.querySelectorAll(`.${listItemClass}`);
+        console.log("removing tab: " + tabId)
+        // class
+        console.log(listItemClass)
+        console.log(listItems)
+
+        for (let listItem of listItems) {
+            console.log("removing tab: " + tabId)
+            console.log(listItem)
+            listItem.remove();
+        }
+    } else {
+        // Update the tab list as needed (e.g., add new tabs or update existing ones)
+    }
+}
+
+
+// Call updateTabList when a tab is created, updated, or removed
+chrome.tabs.onCreated.addListener((tab) => {
+    updateTabList(tab.id, false);
+});
+
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+    updateTabList(tab.id, false);
+});
+
+chrome.tabs.onRemoved.addListener((tabId) => {
+    // log the id of the tab that was removed
+    console.log(tabId);
+    updateTabList(tabId, true);
+});
