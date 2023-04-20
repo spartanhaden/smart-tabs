@@ -1,22 +1,3 @@
-// chrome.tabs.onUpdated.addListener(async function (tabId, changeInfo, tab) {
-//     if (changeInfo.status === 'complete') {
-//         const title = tab.title;
-//         const url = 'http://localhost:8000/title';
-//         const options = {
-//             method: 'POST',
-//             headers: {
-//                 'Content-Type': 'application/json'
-//             },
-//             body: JSON.stringify({ title })
-//         };
-
-//         // send and don't wait for response
-//         fetch(url, options);
-//         // const response = await fetch(url, options);
-//         // console.log(await response.text());
-//     }
-// });
-
 // make a new function that returns a list item with the title and url of the tab and favicon and listener to focus the tab and window when clicked
 function makeTabListItem(tab) {
     const li = document.createElement("li");
@@ -153,30 +134,47 @@ function handleSearchBar() {
 function handleSendDataButton() {
     const sendButton = document.getElementById('send-data');
     sendButton.addEventListener('click', async function () {
-        console.log('hello')
-        const title = 'hello';
-        // Send the title to the local server
-        const xhr = new XMLHttpRequest();
-        xhr.open('POST', 'http://localhost:8000/title');
-        xhr.setRequestHeader('Content-Type', 'application/json');
+        console.log('Getting tabs...');
 
-        // try to send and if there is no response change the button text to failed also catch Failed to load resource: net::ERR_CONNECTION_REFUSED
+        // Get all tabs
+        chrome.tabs.query({}, function (tabs) {
+            // Create an array of tab objects with id, url, and title
+            const tabData = tabs.map(tab => {
+                return {
+                    id: tab.id,
+                    status: tab.status,
+                    url: tab.url,
+                    title: tab.title
+                };
+            });
 
-        // status div
-        const status = document.getElementById('status');
+            console.log('Tabs data:', tabData);
 
-        response = xhr.send(JSON.stringify({ title }));
+            // Send the tabData to the local server
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', 'http://localhost:8000/tabs');
+            xhr.setRequestHeader('Content-Type', 'application/json');
 
-        // xhr.onload = function () {
-        //     if (xhr.status != 200) { // analyze HTTP status of the response
-        //         console.log(`Error ${xhr.status}: ${xhr.statusText}`); // e.g. 404: Not Found
-        //         status.textContent = `Error ${xhr.status}: ${xhr.statusText}`;
-        //     } else { // show the result
-        //         console.log(`Done, got ${xhr.response.length} bytes`); // response is the server
-        //         status.textContent = `Done, got ${xhr.response.length} bytes`;
-        //     }
-        // };
+            // status div
+            const status = document.getElementById('status');
 
+            xhr.send(JSON.stringify({ tabs: tabData }));
+
+            xhr.onload = function () {
+                if (xhr.status != 200) { // analyze HTTP status of the response
+                    console.log(`Error ${xhr.status}: ${xhr.statusText}`); // e.g. 404: Not Found
+                    status.textContent = `Error ${xhr.status}: ${xhr.statusText}`;
+                } else { // show the result
+                    console.log(`success, got ${xhr.response.length} bytes`); // response is the server
+                    status.textContent = `success!`;
+                }
+            };
+
+            xhr.onerror = function () {
+                console.log(`Error ${xhr.status}: ${xhr.statusText}`);
+                status.textContent = "Server not running or connection error";
+            };
+        });
     });
 };
 
