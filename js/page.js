@@ -238,6 +238,9 @@ window.onload = function () {
     updateInfo();
     handleSearchBar();
 
+    // automatically focus on the search bar
+    document.getElementById('search-box').focus();
+
     // for each window get the title of the current tab and add a new h2 element to the page with that and the number of tabs in the window
     chrome.windows.getAll({ populate: true }, function (windows) {
         let windowList = [];
