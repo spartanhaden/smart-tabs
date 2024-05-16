@@ -106,6 +106,11 @@ function handleSearchBar() {
 
     searchBox.addEventListener('input', function () {
         const query = searchBox.value.toLowerCase();
+        if (query === '') {
+            searchResultStatus.textContent = '';
+            searchResults.innerHTML = '';
+            return;
+        }
         chrome.tabs.query({}, function (tabs) {
             const matchingTabs = tabs.filter(function (tab) {
                 return tab.title.toLowerCase().includes(query) || tab.url.toLowerCase().includes(query);
